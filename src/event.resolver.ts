@@ -1,4 +1,4 @@
-import { Int, Resolver, Subscription } from '@nestjs/graphql';
+import { Resolver, Subscription, Args } from '@nestjs/graphql';
 import { PubSubService } from './pubsub.service';
 import { Conversation } from './conversations/models/conversations.models';
 import { Message } from './messages/models/messages.model';
@@ -12,17 +12,24 @@ export class EventResolver {
   }
 
   @Subscription(() => String, { name: 'conversationDeleted' })
-  conversationDeleted() {
+  conversationDeleted(@Args('conversationId') conversationId: string) {
+    console.log(conversationId);
     return this.pubSubService.asyncIterator('CONVERSATION_DELETED');
   }
 
-  @Subscription(() => String, { name: 'conversationUpdated' })
-  conversationUpdated() {
+  @Subscription(() => String, {
+    name: 'conversationUpdated',
+  })
+  conversationUpdated(@Args('conversationId') conversationId: string) {
+    console.log(conversationId);
     return this.pubSubService.asyncIterator('CONVERSATION_UPDATED');
   }
 
-  @Subscription(() => Message, { name: 'messageSent' })
-  messageSent() {
+  @Subscription(() => Message, {
+    name: 'messageSent',
+  })
+  messageSent(@Args('conversationId') conversationId: string) {
+    console.log(conversationId);
     return this.pubSubService.asyncIterator('MESSAGE_SENT');
   }
 }
