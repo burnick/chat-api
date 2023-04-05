@@ -30,9 +30,6 @@ export class UsersService {
         throw new GraphQLError('Existing Username');
       }
 
-      console.log('==== session id === ');
-      console.log(sessionUser);
-
       return await this.prisma.user.update({
         where: {
           id: sessionUser.user.id,
@@ -53,7 +50,6 @@ export class UsersService {
     myUsername: string;
     searchedUsername: string;
   }) {
-    console.log('============ searchUsername');
     return this.prisma.user.findMany({
       where: {
         username: {
