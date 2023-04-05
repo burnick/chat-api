@@ -8,5 +8,6 @@ import { EventModule } from '../event.module';
 @Module({
   imports: [EventModule, UsersModule],
   providers: [MessagesResolver, MessagesService, PrismaService],
+  exports: [MessagesService],
 })
 export class MessagesModule {}

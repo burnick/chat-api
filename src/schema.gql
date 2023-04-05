@@ -26,6 +26,10 @@ input CreateConversationInput {
   participantIds: [String!]
 }
 
+type CreateConversationOutput {
+  conversationId: String!
+}
+
 input CreateMessageInput {
   body: String!
   conversationId: String!
@@ -57,7 +61,7 @@ type Message {
 }
 
 type Mutation {
-  createConversation(createConversationInput: CreateConversationInput!): Conversation!
+  createConversation(createConversationInput: CreateConversationInput!): CreateConversationOutput!
   createMessage(createMessageInput: CreateMessageInput!): Message!
   createUsername(createUserInput: CreateUserInput!): User!
   removeConversation(id: Int!): Conversation!
@@ -81,7 +85,7 @@ type Subscription {
   conversationCreated: Conversation!
   conversationDeleted: String!
   conversationUpdated: String!
-  messageSent: String!
+  messageSent: Message!
 }
 
 input UpdateConversationInput {

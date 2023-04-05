@@ -16,11 +16,11 @@ export class ConversationsService {
   ) {}
 
   async create(
-    sessionUser: User,
+    sessionUser: Session,
     createConversationInput: CreateConversationInput,
   ) {
     try {
-      const { id: userId } = sessionUser;
+      const { id: sessionId } = sessionUser.user;
       /**
        * create Conversation entity
        */
@@ -30,7 +30,7 @@ export class ConversationsService {
             createMany: {
               data: createConversationInput.participantIds.map((id) => ({
                 userId: id,
-                hasSeenLatestMessage: id === userId,
+                hasSeenLatestMessage: id === sessionId,
               })),
             },
           },

@@ -8,7 +8,7 @@ import { User } from 'src/users/models/users.models';
 import { conversationPopulated } from '../conversations/conversation-custom.resolvers';
 import { PubSubService } from '../pubsub.service';
 import { userIsConversationParticipant } from '../common/Functions/functions';
-import { v4 as uuidv4 } from 'uuid';
+import Session from '../common/middleware/session.decorator';
 
 @Injectable()
 export class MessagesService {
@@ -16,7 +16,7 @@ export class MessagesService {
     private prisma: PrismaService,
     private pubSubService: PubSubService,
   ) {}
-  async create(sessionUser: User, createMessageInput: CreateMessageInput) {
+  async create(sessionUser: Session, createMessageInput: CreateMessageInput) {
     try {
       const newMessage = await this.prisma.message.create({
         data: {
@@ -30,7 +30,7 @@ export class MessagesService {
        */
       const participant = await this.prisma.conversationParticipant.findFirst({
         where: {
-          userId: sessionUser.id,
+          userId: sessionUser.user.id,
           conversationId: createMessageInput.conversationId,
         },
       });
@@ -65,7 +65,7 @@ export class MessagesService {
             updateMany: {
               where: {
                 NOT: {
-                  userId: sessionUser.id,
+                  userId: sessionUser.user.id,
                 },
               },
               data: {
@@ -93,9 +93,8 @@ export class MessagesService {
     return `This action returns one message`;
   }
 
-  async findAll(conversationId: string) {
-    //TODO: fix session
-    const userId = uuidv4();
+  async findAll(sessionUser: Session, conversationId: string) {
+    const { id: userId } = sessionUser.user;
 
     const conversation = await this.prisma.conversation.findUnique({
       where: {
