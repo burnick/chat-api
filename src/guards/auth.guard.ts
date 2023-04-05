@@ -7,11 +7,15 @@ import { getSession } from 'next-auth/react';
 export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
+    const request = await ctx?.getContext();
+
     try {
-      const session = await getSession({
-        req: ctx.getContext()?.req,
-      });
-      return !!session;
+      if (request?.sessionUser) {
+        const session = await getSession({
+          req: request?.req,
+        });
+        return !!session;
+      }
     } catch (e: unknown) {
       console.error('error unable to read session');
     }
