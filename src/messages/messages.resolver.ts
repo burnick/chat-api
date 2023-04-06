@@ -51,7 +51,7 @@ export class MessagesResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => Message)
-  removeMessage(@Args('id', { type: () => Int }) id: number) {
+  removeMessage(@Args('id') id: string) {
     return this.messagesService.remove(id);
   }
 }

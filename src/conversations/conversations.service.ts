@@ -91,11 +91,21 @@ export class ConversationsService {
     return `This action returns a #${id} conversation`;
   }
 
-  update(id: number, updateConversationInput: UpdateConversationInput) {
+  update(id: string, updateConversationInput: UpdateConversationInput) {
     return `This action updates a #${id} conversation`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} conversation`;
+  async remove(conversationId: string) {
+    const conversation = await this.prisma.conversation.delete({
+      where: {
+        id: conversationId,
+      },
+    });
+
+    this.pubSubService.publish('CONVERSATION_DELETED', {
+      ...conversation,
+    });
+
+    return conversation;
   }
 }

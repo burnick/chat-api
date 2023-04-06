@@ -11,17 +11,16 @@ export class EventResolver {
     return this.pubSubService.asyncIterator('CONVERSATION_CREATED');
   }
 
-  @Subscription(() => String, { name: 'conversationDeleted' })
-  conversationDeleted(@Args('conversationId') conversationId: string) {
-    console.log(conversationId);
+  @Subscription(() => Conversation, { name: 'conversationDeleted' })
+  conversationDeleted() {
     return this.pubSubService.asyncIterator('CONVERSATION_DELETED');
   }
 
-  @Subscription(() => String, {
+  @Subscription(() => Conversation, {
     name: 'conversationUpdated',
   })
   conversationUpdated(@Args('conversationId') conversationId: string) {
-    console.log(conversationId);
+    console.log('conversationUpdated', conversationId);
     return this.pubSubService.asyncIterator('CONVERSATION_UPDATED');
   }
 
@@ -29,7 +28,12 @@ export class EventResolver {
     name: 'messageSent',
   })
   messageSent(@Args('conversationId') conversationId: string) {
-    console.log(conversationId);
-    return this.pubSubService.asyncIterator('MESSAGE_SENT');
+    console.log('message sent ', conversationId);
+    return this.pubSubService
+      .asyncIterator('MESSAGE_SENT')
+      .next()
+      .then(({ value }) =>
+        value.filter((v: Conversation) => v.id === conversationId),
+      );
   }
 }

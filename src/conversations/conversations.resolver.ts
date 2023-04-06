@@ -5,6 +5,7 @@ import Session from '../common/middleware/session.decorator';
 import { CreateConversationInput } from './dto/create-conversation.input';
 import { UpdateConversationInput } from './dto/update-conversation.input';
 import { CreateConversationOutput } from './dto/create-conversation.output';
+import { UpdateConversationOutput } from './dto/update-conversation.output';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 
@@ -40,7 +41,7 @@ export class ConversationsResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => Conversation)
+  @Mutation(() => UpdateConversationOutput, { name: 'updateConversation' })
   updateConversation(
     @Args('updateConversationInput')
     updateConversationInput: UpdateConversationInput,
@@ -52,8 +53,8 @@ export class ConversationsResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => Conversation)
-  removeConversation(@Args('id', { type: () => Int }) id: number) {
-    return this.conversationsService.remove(id);
+  @Mutation(() => Conversation, { name: 'deleteConversation' })
+  deleteConversation(@Args('conversationId') conversationId: string) {
+    return this.conversationsService.remove(conversationId);
   }
 }

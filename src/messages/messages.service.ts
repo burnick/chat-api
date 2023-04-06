@@ -136,8 +136,17 @@ export class MessagesService {
     return `This action updates a #${id} message`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} message`;
+  async remove(id: string) {
+    const message = await this.prisma.message.delete({
+      where: {
+        id,
+      },
+    });
+
+    this.pubSubService.publish('MESSAGE_DELETED', {
+      messageDeleted: message,
+    });
+    return message;
   }
 }
 

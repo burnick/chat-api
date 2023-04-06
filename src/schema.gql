@@ -64,10 +64,10 @@ type Mutation {
   createConversation(createConversationInput: CreateConversationInput!): CreateConversationOutput!
   createMessage(createMessageInput: CreateMessageInput!): Message!
   createUsername(createUserInput: CreateUserInput!): User!
-  removeConversation(id: Int!): Conversation!
-  removeMessage(id: Int!): Message!
+  deleteConversation(conversationId: String!): Conversation!
+  removeMessage(id: String!): Message!
   removeUser(id: String!): User!
-  updateConversation(updateConversationInput: UpdateConversationInput!): Conversation!
+  updateConversation(updateConversationInput: UpdateConversationInput!): UpdateConversationOutput!
   updateMessage(updateMessageInput: UpdateMessageInput!): Message!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
@@ -83,14 +83,22 @@ type Query {
 
 type Subscription {
   conversationCreated: Conversation!
-  conversationDeleted(conversationId: String!): String!
-  conversationUpdated(conversationId: String!): String!
+  conversationDeleted: Conversation!
+  conversationUpdated(conversationId: String!): Conversation!
   messageSent(conversationId: String!): Message!
 }
 
 input UpdateConversationInput {
-  id: Int!
+  id: String!
   participantIds: [String!]
+}
+
+type UpdateConversationOutput {
+  addedUserIds: [String!]
+  conversation: Conversation!
+  latestMessage: Message
+  removedUserIds: [String!]
+  updatedAt: DateTime!
 }
 
 input UpdateMessageInput {
