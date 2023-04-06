@@ -6,15 +6,12 @@ import { CreateConversationInput } from './dto/create-conversation.input';
 import { UpdateConversationInput } from './dto/update-conversation.input';
 import { CreateConversationOutput } from './dto/create-conversation.output';
 import { UpdateConversationOutput } from './dto/update-conversation.output';
-import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from '../guards/auth.guard';
 import { MarkConversationReadInput } from './dto/mark-conversation-read.input';
 
 @Resolver(() => Conversation)
 export class ConversationsResolver {
   constructor(private readonly conversationsService: ConversationsService) {}
 
-  @UseGuards(AuthGuard)
   @Mutation(() => CreateConversationOutput)
   createConversation(
     @Context('sessionUser') sessionUser: Session,
@@ -29,19 +26,16 @@ export class ConversationsResolver {
     return { conversationId: id };
   }
 
-  @UseGuards(AuthGuard)
   @Query(() => [Conversation], { name: 'conversations' })
   findAll(@Context('sessionUser') sessionUser: Session) {
     return this.conversationsService.getConversations(sessionUser);
   }
 
-  @UseGuards(AuthGuard)
   @Query(() => Conversation, { name: 'conversation' })
   findOne(@Args('id', { type: () => Int }) id: number) {
     return this.conversationsService.findOne(id);
   }
 
-  @UseGuards(AuthGuard)
   @Mutation(() => UpdateConversationOutput, { name: 'updateConversation' })
   updateConversation(
     @Args('updateConversationInput')
@@ -53,7 +47,6 @@ export class ConversationsResolver {
     );
   }
 
-  @UseGuards(AuthGuard)
   @Mutation(() => Boolean, { name: 'deleteConversation' })
   deleteConversation(
     @Context('sessionUser') sessionUser: Session,
@@ -62,7 +55,6 @@ export class ConversationsResolver {
     return this.conversationsService.remove(sessionUser, conversationId);
   }
 
-  @UseGuards(AuthGuard)
   @Mutation(() => Boolean, { name: 'markConversationAsRead' })
   markConversationAsRead(
     @Context('sessionUser') sessionUser: Session,
