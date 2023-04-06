@@ -53,8 +53,11 @@ export class ConversationsResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => Conversation, { name: 'deleteConversation' })
-  deleteConversation(@Args('conversationId') conversationId: string) {
-    return this.conversationsService.remove(conversationId);
+  @Mutation(() => Boolean, { name: 'deleteConversation' })
+  deleteConversation(
+    @Context('sessionUser') sessionUser: Session,
+    @Args('conversationId') conversationId: string,
+  ) {
+    return this.conversationsService.remove(sessionUser, conversationId);
   }
 }

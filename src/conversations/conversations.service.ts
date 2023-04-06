@@ -96,17 +96,38 @@ export class ConversationsService {
     return `This action updates a #${id} conversation`;
   }
 
-  async remove(conversationId: string) {
-    const conversation = await this.prisma.conversation.delete({
-      where: {
-        id: conversationId,
-      },
-    });
+  async remove(sessionUser: Session, conversationId: string) {
+    if (!sessionUser?.user) {
+      throw new GraphQLError('Not authorized');
+    }
 
-    this.pubSubService.publish('CONVERSATION_DELETED', {
-      ...conversation,
-    });
+    try {
+      const [deletedConversation] = await this.prisma.$transaction([
+        this.prisma.conversation.delete({
+          where: {
+            id: conversationId,
+          },
+          include: conversationPopulated,
+        }),
+        this.prisma.conversationParticipant.deleteMany({
+          where: {
+            conversationId,
+          },
+        }),
+        this.prisma.message.deleteMany({
+          where: {
+            conversationId,
+          },
+        }),
+      ]);
 
-    return conversation;
+      this.pubSubService.publish('CONVERSATION_DELETED', {
+        conversationDeleted: deletedConversation,
+      });
+      return true;
+    } catch (error: any) {
+      console.log('deleteConversation error', error);
+      throw new GraphQLError(error?.message);
+    }
   }
 }
