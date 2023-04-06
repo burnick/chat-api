@@ -20,6 +20,6 @@ export class AuthGuard implements CanActivate {
       console.error('error unable to read session');
     }
 
-    return request;
+    return !!request?.sessionUser;
   }
 }

@@ -56,6 +56,7 @@ export class ConversationsService {
   async findMany(sessionUser: Session) {
     try {
       const { id } = sessionUser.user;
+
       const conversations = await this.prisma.conversation.findMany({
         /**
          * Below has been confirmed to be the correct

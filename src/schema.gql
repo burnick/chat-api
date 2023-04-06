@@ -84,7 +84,7 @@ type Query {
 type Subscription {
   conversationCreated: Conversation!
   conversationDeleted: Conversation!
-  conversationUpdated(conversationId: String!): Conversation!
+  conversationUpdated: UpdateConversationOutput!
   messageSent(conversationId: String!): Message!
 }
 

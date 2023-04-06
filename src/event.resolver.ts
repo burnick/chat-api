@@ -2,6 +2,7 @@ import { Resolver, Subscription, Args } from '@nestjs/graphql';
 import { PubSubService } from './pubsub.service';
 import { Conversation } from './conversations/models/conversations.models';
 import { Message } from './messages/models/messages.model';
+import { UpdateConversationOutput } from './conversations/dto/update-conversation.output';
 @Resolver()
 export class EventResolver {
   constructor(private pubSubService: PubSubService) {}
@@ -16,11 +17,10 @@ export class EventResolver {
     return this.pubSubService.asyncIterator('CONVERSATION_DELETED');
   }
 
-  @Subscription(() => Conversation, {
+  @Subscription(() => UpdateConversationOutput, {
     name: 'conversationUpdated',
   })
-  conversationUpdated(@Args('conversationId') conversationId: string) {
-    console.log('conversationUpdated', conversationId);
+  conversationUpdated() {
     return this.pubSubService.asyncIterator('CONVERSATION_UPDATED');
   }
 
@@ -28,7 +28,7 @@ export class EventResolver {
     name: 'messageSent',
   })
   messageSent(@Args('conversationId') conversationId: string) {
-    console.log('message sent ', conversationId);
+    // console.log('message sent ', conversationId);
     return this.pubSubService
       .asyncIterator('MESSAGE_SENT')
       .next()
