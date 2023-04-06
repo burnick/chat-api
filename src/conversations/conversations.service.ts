@@ -6,7 +6,7 @@ import { PubSubService } from '../pubsub.service';
 import { CreateConversationInput } from './dto/create-conversation.input';
 import { UpdateConversationInput } from './dto/update-conversation.input';
 import { conversationPopulated } from '../conversations/conversation-custom.resolvers';
-import { User } from 'src/users/models/users.models';
+import { ConversationPopulated } from '../common/types';
 
 @Injectable()
 export class ConversationsService {
@@ -19,30 +19,30 @@ export class ConversationsService {
     sessionUser: Session,
     createConversationInput: CreateConversationInput,
   ) {
+    if (!sessionUser?.user) {
+      throw new GraphQLError('Not authorized');
+    }
+    const { id: userId } = sessionUser.user;
+
     try {
-      const { id: sessionId } = sessionUser.user;
-      /**
-       * create Conversation entity
-       */
       const conversation = await this.prisma.conversation.create({
         data: {
           participants: {
             createMany: {
               data: createConversationInput.participantIds.map((id) => ({
                 userId: id,
-                hasSeenLatestMessage: id === sessionId,
+                hasSeenLatestMessage: id === userId,
               })),
             },
           },
         },
         include: conversationPopulated,
       });
-
       this.pubSubService.publish('CONVERSATION_CREATED', {
         conversationCreated: conversation,
       });
 
-      return conversation.id;
+      return { conversationId: conversation.id };
     } catch (error) {
       console.log('createConversation error', error);
       throw new GraphQLError('Error creating conversation');
@@ -127,6 +127,50 @@ export class ConversationsService {
       return true;
     } catch (error: any) {
       console.log('deleteConversation error', error);
+      throw new GraphQLError(error?.message);
+    }
+  }
+
+  async getConversations(
+    sessionUser: Session,
+  ): Promise<ConversationPopulated[]> {
+    if (!sessionUser?.user) {
+      throw new GraphQLError('Not authorized');
+    }
+
+    try {
+      const { id } = sessionUser.user;
+      /**
+       * Find all conversations that user is part of
+       */
+      const conversations = await this.prisma.conversation.findMany({
+        /**
+         * Below has been confirmed to be the correct
+         * query by the Prisma team. Has been confirmed
+         * that there is an issue on their end
+         * Issue seems specific to Mongo
+         */
+        // where: {
+        //   participants: {
+        //     some: {
+        //       userId: {
+        //         equals: id,
+        //       },
+        //     },
+        //   },
+        // },
+        include: conversationPopulated,
+      });
+
+      /**
+       * Since above query does not work
+       */
+      return conversations.filter(
+        (conversation) =>
+          !!conversation.participants.find((p) => p.userId === id),
+      );
+    } catch (error: any) {
+      console.log('error', error);
       throw new GraphQLError(error?.message);
     }
   }

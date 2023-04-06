@@ -94,17 +94,24 @@ export class MessagesService {
   }
 
   async findAll(sessionUser: Session, conversationId: string) {
-    const { id: userId } = sessionUser.user;
+    const {
+      user: { id: userId },
+    } = sessionUser;
 
+    /**
+     * Verify that user is a participant
+     */
     const conversation = await this.prisma.conversation.findUnique({
       where: {
         id: conversationId,
       },
       include: conversationPopulated,
     });
+
     if (!conversation) {
       throw new GraphQLError('Conversation Not Found');
     }
+
     const allowedToView = userIsConversationParticipant(
       conversation.participants,
       userId,

@@ -20,15 +20,6 @@ export class MessagesResolver {
     return this.messagesService.create(sessionUser, createMessageInput);
   }
 
-  // @UseGuards(AuthGuard)
-  // @Query(() => [Message], { name: 'messages' })
-  // findAll(
-  //   @Session() sessionUser: Session,
-  //   @Args('conversationId', { type: () => String }) conversationId: string,
-  // ) {
-  //   return this.messagesService.findAll(sessionUser, conversationId);
-  // }
-
   @UseGuards(AuthGuard)
   @Query(() => [Message], { name: 'messages' })
   findOne(

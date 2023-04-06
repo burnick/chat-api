@@ -31,7 +31,7 @@ export class ConversationsResolver {
   @UseGuards(AuthGuard)
   @Query(() => [Conversation], { name: 'conversations' })
   findAll(@Context('sessionUser') sessionUser: Session) {
-    return this.conversationsService.findMany(sessionUser);
+    return this.conversationsService.getConversations(sessionUser);
   }
 
   @UseGuards(AuthGuard)
