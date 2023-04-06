@@ -8,6 +8,7 @@ import { CreateConversationOutput } from './dto/create-conversation.output';
 import { UpdateConversationOutput } from './dto/update-conversation.output';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
+import { MarkConversationReadInput } from './dto/mark-conversation-read.input';
 
 @Resolver(() => Conversation)
 export class ConversationsResolver {
@@ -59,5 +60,18 @@ export class ConversationsResolver {
     @Args('conversationId') conversationId: string,
   ) {
     return this.conversationsService.remove(sessionUser, conversationId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean, { name: 'markConversationAsRead' })
+  markConversationAsRead(
+    @Context('sessionUser') sessionUser: Session,
+    @Args('markConversationReadInput')
+    markConversationReadInput: MarkConversationReadInput,
+  ) {
+    return this.conversationsService.updateMany(
+      sessionUser,
+      markConversationReadInput,
+    );
   }
 }

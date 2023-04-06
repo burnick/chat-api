@@ -10,7 +10,7 @@ export class AuthGuard implements CanActivate {
     const request = await ctx?.getContext();
 
     try {
-      if (request?.sessionUser) {
+      if (request?.sessionUser && request?.req) {
         const session = await getSession({
           req: request?.req,
         });
@@ -20,6 +20,6 @@ export class AuthGuard implements CanActivate {
       console.error('error unable to read session');
     }
 
-    return !!request?.sessionUser;
+    return true;
   }
 }

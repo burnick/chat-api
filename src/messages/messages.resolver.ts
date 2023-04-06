@@ -12,9 +12,9 @@ export class MessagesResolver {
   constructor(private readonly messagesService: MessagesService) {}
 
   @UseGuards(AuthGuard)
-  @Mutation(() => Message)
+  @Mutation(() => Boolean, { name: 'sendMessage' })
   createMessage(
-    @Session() sessionUser: Session,
+    @Context('sessionUser') sessionUser: Session,
     @Args('createMessageInput') createMessageInput: CreateMessageInput,
   ) {
     return this.messagesService.create(sessionUser, createMessageInput);

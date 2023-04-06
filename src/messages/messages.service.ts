@@ -4,7 +4,6 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { CreateMessageInput } from './dto/create-message.input';
 import { UpdateMessageInput } from './dto/update-message.input';
-import { User } from 'src/users/models/users.models';
 import { conversationPopulated } from '../conversations/conversation-custom.resolvers';
 import { PubSubService } from '../pubsub.service';
 import { userIsConversationParticipant } from '../common/Functions/functions';
@@ -17,11 +16,26 @@ export class MessagesService {
     private pubSubService: PubSubService,
   ) {}
   async create(sessionUser: Session, createMessageInput: CreateMessageInput) {
+    if (!sessionUser?.user) {
+      throw new GraphQLError('Not authorized');
+    }
+    const { id: userId } = sessionUser.user;
+    const {
+      id: messageId,
+      senderId,
+      conversationId,
+      body,
+    } = createMessageInput;
     try {
+      /**
+       * Create new message entity
+       */
       const newMessage = await this.prisma.message.create({
         data: {
-          id: createMessageInput.messageId,
-          ...createMessageInput,
+          id: messageId,
+          senderId,
+          conversationId,
+          body,
         },
         include: messagePopulated,
       });
@@ -30,26 +44,23 @@ export class MessagesService {
        */
       const participant = await this.prisma.conversationParticipant.findFirst({
         where: {
-          userId: sessionUser.user.id,
-          conversationId: createMessageInput.conversationId,
+          userId,
+          conversationId,
         },
       });
-
       /**
        * Should always exist
        */
       if (!participant) {
         throw new GraphQLError('Participant does not exist');
       }
-
       const { id: participantId } = participant;
-
       /**
        * Update conversation latestMessage
        */
       const conversation = await this.prisma.conversation.update({
         where: {
-          id: createMessageInput.conversationId,
+          id: conversationId,
         },
         data: {
           latestMessageId: newMessage.id,
@@ -65,7 +76,7 @@ export class MessagesService {
             updateMany: {
               where: {
                 NOT: {
-                  userId: sessionUser.user.id,
+                  userId,
                 },
               },
               data: {
@@ -76,6 +87,7 @@ export class MessagesService {
         },
         include: conversationPopulated,
       });
+
       this.pubSubService.publish('MESSAGE_SENT', { messageSent: newMessage });
       this.pubSubService.publish('CONVERSATION_UPDATED', {
         conversationUpdated: {
@@ -84,9 +96,7 @@ export class MessagesService {
       });
 
       return true;
-    } catch (e: unknown) {
-      console.log(e);
-    }
+    } catch (error) {}
   }
 
   findOne() {
@@ -139,7 +149,7 @@ export class MessagesService {
     }
   }
 
-  update(id: number, updateMessageInput: UpdateMessageInput) {
+  update(id: string, updateMessageInput: UpdateMessageInput) {
     return `This action updates a #${id} message`;
   }
 

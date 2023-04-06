@@ -7,6 +7,7 @@ import { CreateConversationInput } from './dto/create-conversation.input';
 import { UpdateConversationInput } from './dto/update-conversation.input';
 import { conversationPopulated } from '../conversations/conversation-custom.resolvers';
 import { ConversationPopulated } from '../common/types';
+import { MarkConversationReadInput } from './dto/mark-conversation-read.input';
 
 @Injectable()
 export class ConversationsService {
@@ -172,6 +173,30 @@ export class ConversationsService {
     } catch (error: any) {
       console.log('error', error);
       throw new GraphQLError(error?.message);
+    }
+  }
+
+  async updateMany(
+    sessionUser: Session,
+    markConversationReadInput: MarkConversationReadInput,
+  ) {
+    if (!sessionUser?.user) {
+      throw new GraphQLError('Not authorized');
+    }
+    try {
+      await this.prisma.conversationParticipant.updateMany({
+        where: {
+          ...markConversationReadInput,
+        },
+        data: {
+          hasSeenLatestMessage: true,
+        },
+      });
+
+      return true;
+    } catch (error: any) {
+      console.log('markConversationAsRead error', error);
+      throw new GraphQLError(error.message);
     }
   }
 }

@@ -33,7 +33,7 @@ type CreateConversationOutput {
 input CreateMessageInput {
   body: String!
   conversationId: String!
-  messageId: String!
+  id: String!
   senderId: String!
 }
 
@@ -45,6 +45,11 @@ input CreateUserInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input MarkConversationReadInput {
+  conversationId: String!
+  userId: String!
+}
 
 type Message {
   body: String!
@@ -62,11 +67,12 @@ type Message {
 
 type Mutation {
   createConversation(createConversationInput: CreateConversationInput!): CreateConversationOutput!
-  createMessage(createMessageInput: CreateMessageInput!): Message!
   createUsername(createUserInput: CreateUserInput!): User!
   deleteConversation(conversationId: String!): Boolean!
+  markConversationAsRead(markConversationReadInput: MarkConversationReadInput!): Boolean!
   removeMessage(id: String!): Message!
   removeUser(id: String!): User!
+  sendMessage(createMessageInput: CreateMessageInput!): Boolean!
   updateConversation(updateConversationInput: UpdateConversationInput!): UpdateConversationOutput!
   updateMessage(updateMessageInput: UpdateMessageInput!): Message!
   updateUser(updateUserInput: UpdateUserInput!): User!
@@ -105,7 +111,6 @@ input UpdateMessageInput {
   body: String
   conversationId: String
   id: Int!
-  messageId: String
   senderId: String
 }
 
