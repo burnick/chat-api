@@ -74,7 +74,7 @@ type Mutation {
   removeUser(id: String!): User!
   sendMessage(createMessageInput: CreateMessageInput!): Boolean!
   updateConversation(updateConversationInput: UpdateConversationInput!): UpdateConversationOutput!
-  updateMessage(updateMessageInput: UpdateMessageInput!): Message!
+  updateMessageInput(updateMessageInput: UpdateMessageInput!): Message!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
