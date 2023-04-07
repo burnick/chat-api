@@ -1,25 +1,31 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { getSession } from 'next-auth/react';
-// import Session from '../common/middleware/session.decorator';
+import { Observable } from 'rxjs';
+import { skipWhile, take } from 'rxjs/operators';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  public canActivate(context: ExecutionContext): boolean | Observable<boolean> {
     const ctx = GqlExecutionContext.create(context);
-    const request = await ctx?.getContext();
-
-    try {
-      if (request?.sessionUser && request?.req) {
-        const session = await getSession({
-          req: request?.req,
-        });
-        return !!session;
+    const sessionUser =
+      ctx.getContext().sessionUser?.user ??
+      ctx.getContext().req.connectionParams?.session.user;
+    const myObservable = new Observable<boolean>((observer) => {
+      for (let i = 0; i < 5; i++) {
+        if (sessionUser?.id) {
+          observer.next(true);
+        }
+        if (i >= 5) {
+          observer.next(false);
+          observer.complete();
+          break;
+        }
       }
-    } catch (e: unknown) {
-      console.error('error unable to read session');
-    }
+    }).pipe(
+      skipWhile((val) => val !== true),
+      take(1),
+    );
 
-    return !!request?.sessionUser;
+    return myObservable;
   }
 }
