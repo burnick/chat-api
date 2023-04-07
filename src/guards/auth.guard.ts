@@ -11,16 +11,12 @@ export class AuthGuard implements CanActivate {
       ctx.getContext().sessionUser?.user ??
       ctx.getContext().req.connectionParams?.session.user;
     const myObservable = new Observable<boolean>((observer) => {
-      for (let i = 0; i < 5; i++) {
-        if (sessionUser?.id) {
-          observer.next(true);
-          break;
-        }
-        if (i >= 5) {
-          observer.next(false);
-          observer.complete();
-          break;
-        }
+      if (sessionUser?.id) {
+        observer.next(true);
+        observer.complete();
+      } else {
+        observer.next(false);
+        observer.complete();
       }
     }).pipe(
       skipWhile((val) => val !== true),
