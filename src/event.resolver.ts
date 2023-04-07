@@ -28,11 +28,17 @@ export class EventResolver {
     name: 'messageSent',
   })
   messageSent(@Args('conversationId') conversationId: string) {
-    console.log('subscription message sent ', conversationId);
+    console.log('conversationId', conversationId);
+    // this.pubSubService
+    //   .asyncIterator('MESSAGE_SENT')
+    //   .next()
+    //   .then(({ value }) => {
+    //     console.log(value);
+    //     return value.messageSent.conversationId === conversationId
+    //       ? value
+    //       : null;
+    //   });
+
     return this.pubSubService.asyncIterator('MESSAGE_SENT');
-    // .next()
-    // .then(({ value }) =>
-    //   value.filter((v: Conversation) => v.id === conversationId),
-    // );
   }
 }

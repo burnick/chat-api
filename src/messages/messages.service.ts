@@ -21,7 +21,7 @@ export class MessagesService {
     }
     const { id: userId } = sessionUser.user;
     const {
-      id: messageId,
+      // id: messageId,
       senderId,
       conversationId,
       body,
@@ -32,7 +32,7 @@ export class MessagesService {
        */
       const newMessage = await this.prisma.message.create({
         data: {
-          id: messageId,
+          //messageId: messageId,
           senderId,
           conversationId,
           body,
@@ -96,7 +96,9 @@ export class MessagesService {
       });
 
       return true;
-    } catch (error) {}
+    } catch (error) {
+      console.error('sendMessage Error', error);
+    }
   }
 
   findOne() {
