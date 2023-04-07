@@ -8,7 +8,6 @@ import Session from '../common/middleware/session.decorator';
 @Resolver(() => Message)
 export class MessagesResolver {
   constructor(private readonly messagesService: MessagesService) {}
-
   @Mutation(() => Boolean, { name: 'sendMessage' })
   createMessage(
     @Context('sessionUser') sessionUser: Session,
@@ -25,7 +24,7 @@ export class MessagesResolver {
     return this.messagesService.findAll(sessionUser, conversationId);
   }
 
-  @Mutation(() => Message)
+  @Mutation(() => Message, { name: 'updateMessageInput' })
   updateMessage(
     @Args('updateMessageInput') updateMessageInput: UpdateMessageInput,
   ) {
@@ -35,7 +34,7 @@ export class MessagesResolver {
     );
   }
 
-  @Mutation(() => Message)
+  @Mutation(() => Message, { name: 'removeMessage' })
   removeMessage(@Args('id') id: string) {
     return this.messagesService.remove(id);
   }

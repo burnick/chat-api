@@ -50,8 +50,8 @@ export class ConversationsService {
     }
   }
 
-  findAll() {
-    return `This action returns all conversations`;
+  async findAll() {
+    return await this.prisma.conversation.findMany();
   }
 
   async findMany(sessionUser: Session) {
